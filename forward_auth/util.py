@@ -12,3 +12,8 @@ class Util:
             return json.loads(response.read().decode(encoding))
         else:
             raise (Exception(f"Could not load data from {url} code={response.code}"))
+
+    @staticmethod
+    def user_info_as_cache_key(user_info):
+        """Return username from request_info to be used as cache key"""
+        return user_info["username"]

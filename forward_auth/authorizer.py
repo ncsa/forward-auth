@@ -1,4 +1,6 @@
 import logging
+import urllib.parse
+import urllib.request
 from abc import ABC, abstractmethod
 import pymongo
 import bson
@@ -73,11 +75,12 @@ class AuthorizerInterface(ABC):
 
 
 class IncoreAuthorizer(AuthorizerInterface):
-    def __init__(self, mongodb_uri:str, mongo_client=None):
+    def __init__(self, mongodb_uri:str, mongo_client=None, datawolf_url=None):
         if mongo_client:
             self.mongo_client = mongo_client
         else:
             self.mongo_client = pymongo.MongoClient(mongodb_uri)
+        self.datawolf_url = datawolf_url
 
     def initiate_user_group(self, username, groups):
         mongo_user = self.mongo_client["spacedb"]["UserGroups"].find_one({"username": username})
@@ -175,10 +178,10 @@ class IncoreAuthorizer(AuthorizerInterface):
             logging.info(f"Quota for {username} doesn't exist. Please initiate first.")
             return False
 
-    def check_authorization(self, user_info, requested_resource, protected_resource, allowed_groups, allowed_roles):
+    def check_authorization(self, user_info, requested_resource, protected_resources, allowed_groups, allowed_roles):
         authorized_groups = False
         authorized_roles = False
-        if requested_resource in protected_resource:
+        if requested_resource in protected_resources:
             for group in user_info['groups']:
                 if group in allowed_groups:
                     authorized_groups = True
@@ -198,3 +201,26 @@ class IncoreAuthorizer(AuthorizerInterface):
             logging.debug("role not found in user_accessible_resources")
 
         return authorized_roles and authorized_groups
+
+    def add_datawolf_user(self, user_info):
+        if self.datawolf_url:
+            query = urllib.parse.urlencode({
+                "firstname": user_info.get("firstname"),
+                "lastname": user_info.get("lastname"),
+                "email": user_info.get("email"),
+            })
+            datawolf_url = "%s/persons?%s" % (self.datawolf_url.rstrip("/"), query)
+            req = urllib.request.Request(datawolf_url, method='POST')
+            response = urllib.request.urlopen(req)
+            if response.code == 200:
+                logging.info(f"Added user to datawolf {user_info.get('username')}")
+                return True
+            elif response.code == 204:
+                logging.debug(f"User already exists in datawolf {user_info.get('username')}")
+            else:
+                logging.info(f"Did not add user to datawolf {user_info.get('username')}")
+        else:
+            logging.debug("Datawolf URL not found.")
+
+        return False
+

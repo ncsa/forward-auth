@@ -2,7 +2,6 @@ import logging
 from abc import ABC, abstractmethod
 from jose import jwt
 from jose.exceptions import JWTError, ExpiredSignatureError, JWTClaimsError
-import time
 
 from util import Util
 
@@ -86,7 +85,6 @@ class JWTAuthenticator(AuthenticatorInterface):
             "resource": "",
             "groups": [],
             "roles": [],
-            "start": time.time()
         }
         valid, decoded_token = self.verify_token(token)
         if valid:
