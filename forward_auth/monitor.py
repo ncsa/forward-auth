@@ -6,6 +6,8 @@ import influxdb_client
 import IP2Location
 from dotenv import load_dotenv
 
+from forward_auth.util import Util
+
 
 class MonitorInterface(ABC):
     @abstractmethod
@@ -46,7 +48,7 @@ class IncoreMonitor(MonitorInterface):
 
     def record_request(self, request):
         # get some handy variables
-        request_info = IncoreMonitor.get_request_info(request)
+        request_info = Util.get_request_info(request)
         resource = request_info.get("resource")
         uri = request_info['uri']
 
@@ -128,38 +130,3 @@ class IncoreMonitor(MonitorInterface):
             self.influxdb_writer.write("incore", "incore", datapoint)
         else:
             logging.info(datapoint)
-
-    @staticmethod
-    def get_request_info(request):
-        request_info = {
-            "uri": "",
-            "resource": "",
-            "method": request.method,
-            "fields": {},
-            "start": time.time()
-        }
-        try:
-            uri = request.headers.get('X-Forwarded-Uri', '')
-            if not uri:
-                uri = request.url
-            request_info['uri'] = uri
-
-            # TODO simplified logic need to add back later
-            pieces = uri.split('/')
-            if len(pieces) == 2:
-                request_info['resource'] = pieces[1]
-            else:
-                request_info['resource'] = pieces[1]
-                if request_info['resource'] == "doc" and len(pieces) > 2:
-                    request_info['fields']['manual'] = pieces[2]
-                if request_info['resource'] == "playbook" and len(pieces) > 2:
-                    request_info['fields']['playbook'] = pieces[2]
-                if request_info['resource'] == "data" and len(pieces) > 4 and uri.endswith('blob'):
-                    request_info['fields']['dataset'] = pieces[4]
-                if request_info['resource'] == "dfr3" and len(pieces) > 4:
-                    request_info['fields']['fragility'] = pieces[4]
-        except IndexError:
-            logging.info("No / found in path.")
-            request_info['resource'] = 'NA'
-
-        return request_info
