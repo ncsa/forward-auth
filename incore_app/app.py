@@ -7,10 +7,10 @@ from flask import Flask, request, Response, make_response
 from dotenv import load_dotenv
 from cachetools import cached, TTLCache
 
-from authenticator import JWTAuthenticator
-from authorizer import IncoreAuthorizer
-from monitor import IncoreMonitor
-from util import Util
+from forward_auth.authenticator import JWTAuthenticator
+from forward_auth.authorizer import IncoreAuthorizer
+from forward_auth.monitor import IncoreMonitor
+from forward_auth.util import Util
 
 # Load environment variables from .env file
 load_dotenv()

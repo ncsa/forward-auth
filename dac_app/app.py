@@ -5,14 +5,14 @@ from urllib.parse import unquote_plus
 from flask import Flask, request, Response, make_response
 from dotenv import load_dotenv
 
-from authenticator import JWTAuthenticator
-from util import Util
+from forward_auth.authenticator import JWTAuthenticator
+from forward_auth.util import Util
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Load configuration from JSON file
-with open("config.json") as config_file:
+with open("../incore_forward_auth/config.json") as config_file:
     config = json.load(config_file)
 
 app = Flask(__name__)
