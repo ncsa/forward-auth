@@ -1,0 +1,22 @@
+FROM python:3.7-alpine
+
+MAINTAINER Incore <incore-dev@lists.illinois.edu>
+LABEL PROJECT_REPO_URL         = "" \
+      PROJECT_REPO_BROWSER_URL = "" \
+      DESCRIPTION              = ")"
+
+WORKDIR /srv
+
+COPY dac_app/requirements.txt dac_app/
+RUN pip3 install -Ur dac_app/requirements.txt
+
+COPY dac_app dac_app
+COPY forward_auth forward_auth
+
+WORKDIR /srv/dac_app
+
+ENV FLASK_APP="app.py" \
+    KEYCLOAK_PUBLIC_KEY="" \
+    KEYCLOAK_AUDIENCE=""
+
+CMD ["gunicorn", "app:app", "--config", "/srv/dac_app/gunicorn.config.py"]
