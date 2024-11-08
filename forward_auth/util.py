@@ -2,6 +2,8 @@ import urllib.request
 import json
 import time
 import logging
+from urllib.parse import urlparse
+
 
 class Util:
 
@@ -34,8 +36,12 @@ class Util:
                 uri = request.url
             request_info['uri'] = uri
 
+            # Parse the URI and extract the path, stripping the scheme and domain
+            parsed_uri = urlparse(uri)
+            stripped_uri = parsed_uri.path  # This gives you only the path part, excluding https:// and domain
+            pieces = stripped_uri.split('/')
+
             # TODO simplified logic need to add back later
-            pieces = uri.split('/')
             if len(pieces) == 2:
                 request_info['resource'] = pieces[1]
             else:

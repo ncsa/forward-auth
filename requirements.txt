@@ -10,3 +10,5 @@ python-dotenv==0.*
 pymongo==4.*
 cachetools==4.*
 bson==0.*
+flask-testing
+pytest

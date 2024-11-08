@@ -29,7 +29,7 @@ jwt_authenticator = JWTAuthenticator(
 @app.before_request
 def handle_request():
     """Handle incoming requests: authorization, resource checks, and monitoring."""
-    if request.url_rule is None:
+    if request.url_rule is not None:
         return healthz()
 
     # Handle CORS preflight
@@ -37,7 +37,7 @@ def handle_request():
         return Response(status=200)
 
     # Retrieve user and request information
-    request_info = Util.get_request_info(request)['resource']
+    request_info = Util.get_request_info(request)
 
     # Allow non-protected resources
     if request_info['resource'] not in app.config["PROTECTED_RESOURCES"]:
