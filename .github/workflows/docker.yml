@@ -25,7 +25,7 @@ jobs:
       - name: Extract Dockerfile name
         id: extract_name
         run: |
-          NAME="${{ github.event.inputs.dockerfile##*. }}"
+          NAME=$(echo "${{ github.event.inputs.dockerfile }}" | cut -d'.' -f2)
           echo "IMAGE_NAME=$NAME" >> $GITHUB_ENV
 
       # Create metadata for image
