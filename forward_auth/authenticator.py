@@ -29,7 +29,7 @@ class JWTAuthenticator(AuthenticatorInterface):
     JWT Authenticator class that implements the AuthenticatorInterface
     """
 
-    def __init__(self, audience, pem_key, issuer_url=None):
+    def __init__(self, pem_key, issuer_url=None, audience=None):
         self.pem_key = pem_key
         self.issuer_url = issuer_url
         self.audience = audience
@@ -58,7 +58,11 @@ class JWTAuthenticator(AuthenticatorInterface):
         try:
             public_key = self.get_public_key()
             if public_key is not None:
-                decoded_token = jwt.decode(token, self.get_public_key(), audience=self.audience)
+                if self.audience is not None:
+                    decoded_token = jwt.decode(token, public_key, audience=self.audience, options={"verify_aud": True})
+                else:
+                    decoded_token = jwt.decode(token, public_key, options={"verify_aud": False})
+                return True, decoded_token
             else:
                 logging.debug("Could not get public key")
                 return False, "Error: missing valid public key"
@@ -74,7 +78,6 @@ class JWTAuthenticator(AuthenticatorInterface):
         except Exception:
             logging.debug("random exception")
             return False, "Error: cannot verify token"
-        return True, decoded_token
 
     def get_userinfo(self, token):
         user_info = {
