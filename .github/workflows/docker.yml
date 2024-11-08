@@ -82,7 +82,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          dockerfile: ${{ github.event.inputs.dockerfile }}
+          file: ${{ github.event.inputs.dockerfile }}
           push: true
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
