@@ -12,7 +12,7 @@ from forward_auth.util import Util
 load_dotenv()
 
 # Load configuration from JSON file
-with open("../incore_forward_auth/config.json") as config_file:
+with open("./config.json") as config_file:
     config = json.load(config_file)
 
 app = Flask(__name__)
@@ -73,5 +73,5 @@ def healthz():
     return Response("OK", 200)
 
 # Uncomment to run locally
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

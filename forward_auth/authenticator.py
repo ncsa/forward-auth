@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from jose import jwt
 from jose.exceptions import JWTError, ExpiredSignatureError, JWTClaimsError
 
-from util import Util
+from .util import Util
 
 
 class AuthenticatorInterface(ABC):
