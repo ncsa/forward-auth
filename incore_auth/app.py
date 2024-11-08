@@ -16,7 +16,7 @@ from forward_auth.util import Util
 load_dotenv()
 
 # Load configuration from JSON file
-with open("config.json") as config_file:
+with open("./config.json") as config_file:
     config = json.load(config_file)
 
 app = Flask(__name__)

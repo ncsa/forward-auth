@@ -1,0 +1,21 @@
+FROM python:3.7-alpine
+
+MAINTAINER NCSA
+LABEL PROJECT_REPO_URL         = "" \
+      PROJECT_REPO_BROWSER_URL = "" \
+      DESCRIPTION              = ")"
+
+WORKDIR /srv
+
+COPY requirements.txt .
+RUN pip3 install -Ur requirements.txt
+
+COPY dachub_auth dachub_auth
+COPY forward_auth dachub_auth/forward_auth
+
+ENV KEYCLOAK_PUBLIC_KEY="" \
+    KEYCLOAK_AUDIENCE="" \
+    KEYCLOAK_URL=""
+
+WORKDIR /srv/dachub_auth
+CMD ["gunicorn", "app:app", "--config", "gunicorn.config.py"]

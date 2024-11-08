@@ -12,7 +12,7 @@ from forward_auth.util import Util
 load_dotenv()
 
 # Load configuration from JSON file
-with open("../incore_forward_auth/config.json") as config_file:
+with open("./config.json") as config_file:
     config = json.load(config_file)
 
 app = Flask(__name__)
@@ -29,7 +29,7 @@ jwt_authenticator = JWTAuthenticator(
 @app.before_request
 def handle_request():
     """Handle incoming requests: authorization, resource checks, and monitoring."""
-    if request.url_rule is None:
+    if request.url_rule is not None:
         return healthz()
 
     # Handle CORS preflight
@@ -37,32 +37,36 @@ def handle_request():
         return Response(status=200)
 
     # Retrieve user and request information
-    request_info = Util.get_request_info(request)['resource']
+    request_info = Util.get_request_info(request)
 
     # Allow non-protected resources
     if request_info['resource'] not in app.config["PROTECTED_RESOURCES"]:
         return Response(status=200)
 
-    # Authentication check
-    if jwt_authenticator.verify_token(request.headers.get('Authorization', '')):
-        user_info = jwt_authenticator.get_userinfo(request.headers.get('Authorization', ''))
+    # Handle Authorization headers and cookies
+    auth_header = request.headers.get('Authorization') or request.cookies.get('Authorization')
+    if auth_header:
+        token = auth_header.split(" ")[1] if "bearer " in auth_header.lower() else auth_header
+        if token.count('.') != 2:
+            make_response("Invalid JWT format: Not enough segments.", 400)
 
-        # Build response
-        response = Response(status=200)
-        response.headers['X-Auth-UserInfo'] = json.dumps({"preferred_username": user_info['username']})
-        response.headers['X-Auth-UserGroup'] = json.dumps({"groups": user_info['groups']})
+        verified, message = jwt_authenticator.verify_token(token)
+        if verified:
+            user_info = jwt_authenticator.get_userinfo(token)
 
-        # Handle Authorization headers and cookies
-        auth_header = request.headers.get('Authorization') or request.cookies.get('Authorization')
-        if auth_header:
+            # Build response
+            response = Response(status=200)
+            response.headers['X-Auth-UserInfo'] = json.dumps({"preferred_username": user_info['username']})
+            response.headers['X-Auth-UserGroup'] = json.dumps({"groups": user_info['groups']})
             response.headers['Authorization'] = unquote_plus(auth_header)
 
-        group_header = request.headers.get('X-Auth-UserGroup') or request.cookies.get('X-Auth-UserGroup')
-        if group_header:
-            response.headers['X-Auth-UserGroup'] = group_header
+            group_header = request.headers.get('X-Auth-UserGroup') or request.cookies.get('X-Auth-UserGroup')
+            if group_header:
+                response.headers['X-Auth-UserGroup'] = group_header
 
-        return response
-
+            return response
+        else:
+            return make_response(message, 401)
     else:
         return make_response("Unauthenticated", 401)
 
@@ -73,5 +77,5 @@ def healthz():
     return Response("OK", 200)
 
 # Uncomment to run locally
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

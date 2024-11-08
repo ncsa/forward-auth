@@ -1,0 +1,3 @@
+{
+    "PROTECTED_RESOURCES": ["geoserver", "geoserver/web"]
+}
