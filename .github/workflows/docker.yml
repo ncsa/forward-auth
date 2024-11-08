@@ -1,17 +1,6 @@
 name: docker
 
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - "v*.*.*"
-  pull_request:
-    types:
-      - opened
-      - edited
-      - synchronize
-      - reopened
   workflow_dispatch:
     inputs:
       dockerfile:
@@ -21,7 +10,6 @@ on:
         options:
           - Dockerfile.dachub
           - Dockerfile.incore
-
 jobs:
   docker:
     permissions:
