@@ -7,13 +7,13 @@ LABEL PROJECT_REPO_URL         = "" \
 
 WORKDIR /srv
 
-COPY incore_app/requirements.txt incore_app/
-RUN pip3 install -Ur incore_app/requirements.txt
+COPY requirements.txt incore_auth/
+RUN pip3 install -Ur incore_auth/requirements.txt
 
-COPY incore_app incore_app
+COPY incore_auth incore_auth
 COPY forward_auth forward_auth
 
-WORKDIR /srv/incore_app
+WORKDIR /srv/incore_auth
 
 ENV FLASK_APP="app.py" \
     KEYCLOAK_PUBLIC_KEY="" \
@@ -25,4 +25,4 @@ ENV FLASK_APP="app.py" \
     INFLUXDB_V2_TOKEN="" \
     INFLUXDB_V2_FILE_LOCATION="data/IP2LOCATION-LITE-DB5.BIN"
 
-CMD ["gunicorn", "app:app", "--config", "/srv/incore_app/gunicorn.config.py"]
+CMD ["gunicorn", "app:app", "--config", "/srv/incore_auth/gunicorn.config.py"]
