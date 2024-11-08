@@ -6,10 +6,10 @@ on:
       dockerfile:
         description: 'Select the Dockerfile to use'
         required: true
-        default: 'Dockerfile.dachub'
+        default: 'Dockerfile.dachub_auth'
         options:
-          - Dockerfile.dachub
-          - Dockerfile.incore
+          - Dockerfile.dachub_auth
+          - Dockerfile.incore_auth
 
 jobs:
   docker:
@@ -21,15 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Set image name based on selected Dockerfile
-      - name: Set Image Name
-        id: set_image_name
+      # Extract name from Dockerfile input
+      - name: Extract Dockerfile name
+        id: extract_name
         run: |
-          if [[ "${{ github.event.inputs.dockerfile }}" == "Dockerfile.dachub" ]]; then
-            echo "IMAGE_NAME=dachub-auth" >> $GITHUB_ENV
-          elif [[ "${{ github.event.inputs.dockerfile }}" == "Dockerfile.incore" ]]; then
-            echo "IMAGE_NAME=incore-auth" >> $GITHUB_ENV
-          fi
+          NAME="${{ github.event.inputs.dockerfile##*. }}"
+          echo "IMAGE_NAME=$NAME" >> $GITHUB_ENV
 
       # Create metadata for image
       - name: Docker meta
@@ -37,7 +34,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            hub.ncsa.illinois.edu/${{ env.IMAGE_NAME }}
+            hub.ncsa.illinois.edu/dachub/${{ env.IMAGE_NAME }}
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
             type=schedule
