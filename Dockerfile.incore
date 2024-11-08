@@ -11,13 +11,13 @@ COPY requirements.txt incore_auth/
 RUN pip3 install -Ur incore_auth/requirements.txt
 
 COPY incore_auth incore_auth
-COPY forward_auth forward_auth
+COPY forward_auth incore_auth/forward_auth
 
 WORKDIR /srv/incore_auth
 
-ENV FLASK_APP="app.py" \
-    KEYCLOAK_PUBLIC_KEY="" \
+ENV KEYCLOAK_PUBLIC_KEY="" \
     KEYCLOAK_AUDIENCE="" \
+    KEYCLOAK_URL="" \
     DATAWOLF_URL="http://incore-datawolf:8888/datawolf" \
     MONGODB_URI="" \
     INFLUXDB_V2_URL="" \
@@ -25,4 +25,4 @@ ENV FLASK_APP="app.py" \
     INFLUXDB_V2_TOKEN="" \
     INFLUXDB_V2_FILE_LOCATION="data/IP2LOCATION-LITE-DB5.BIN"
 
-CMD ["gunicorn", "app:app", "--config", "/srv/incore_auth/gunicorn.config.py"]
+CMD ["gunicorn", "app:app", "--config", "gunicorn.config.py"]
