@@ -33,7 +33,7 @@ def handle_request():
         return healthz()
 
     # Handle CORS preflight
-    if request.headers.get('X-Forwarded-Method') == 'OPTIONS':
+    if request.headers.get('X-Forwarded-Method') == 'OPTIONS' or request.method == 'OPTIONS':
         return Response(status=200)
 
     # Retrieve user and request information
